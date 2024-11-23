@@ -1,0 +1,158 @@
+    <!DOCTYPE html>
+    <html lang="th">
+    <head>
+        <meta charset="UTF-8">
+        <title>Financial Tracker</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <style>
+            body {
+                background-color: #f4f4f8;
+            }
+        </style>
+    </head>
+    <body class="bg-gray-100 min-h-screen flex items-center justify-center">
+        <div class="container mx-auto px-4 py-8">
+            <div class="bg-white shadow-xl rounded-lg overflow-hidden max-w-4xl mx-auto">
+                <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6">
+                    <h1 class="text-3xl font-bold text-white">บันทึกรายรับรายจ่าย</h1>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <select id="periodType" class="p-3 border rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="monthly">รายเดือน</option>
+                            <option value="daily">รายวัน</option>
+                        </select>
+                        
+                        <select id="month" class="p-3 border rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="1">มกราคม</option>
+                            <option value="2">กุมภาพันธ์</option>
+                            <!-- Add all months -->
+                        </select>
+                        
+                        <select id="year" class="p-3 border rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full bg-white shadow rounded-lg overflow-hidden">
+                            <thead class="bg-gray-200">
+                                <tr>
+                                    <th class="p-3 text-left">วันที่</th>
+                                    <th class="p-3 text-left text-green-600">รายรับ</th>
+                                    <th class="p-3 text-left text-red-600">รายจ่าย</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-100 p-6 rounded-lg">
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold text-green-600">รายรับรวม</h3>
+                            <p id="totalIncome" class="text-2xl font-bold">0</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold text-red-600">รายจ่ายรวม</h3>
+                            <p id="totalExpense" class="text-2xl font-bold">0</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold text-blue-600">คงเหลือ</h3>
+                            <p id="netAmount" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const periodTypeSelect = document.getElementById('periodType');
+            const monthSelect = document.getElementById('month');
+            const yearSelect = document.getElementById('year');
+            const tableBody = document.getElementById('tableBody');
+            const totalIncomeEl = document.getElementById('totalIncome');
+            const totalExpenseEl = document.getElementById('total   Expense');
+            const netAmountEl = document.getElementById('netAmount');
+
+            function populateYears() {
+                const currentYear = new Date().getFullYear();
+                yearSelect.innerHTML = '';
+                for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.text = year + 543;
+                    yearSelect.add(option);
+                    if (year === currentYear) option.selected = true;
+                }
+            }
+
+            function generateTableRows() {
+                const periodType = periodTypeSelect.value;
+                const month = monthSelect.value;
+                const year = yearSelect.value;
+                
+                const daysInMonth = new Date(year, month, 0).getDate();
+                
+                tableBody.innerHTML = '';
+                const rowCount = periodType === 'monthly' ? 12 : daysInMonth;
+
+                for (let i = 1; i <= rowCount; i++) {
+                    const row = tableBody.insertRow();
+                    row.classList.add('hover:bg-gray-50', 'transition', 'duration-200');
+                    
+                    const dateCell = row.insertCell(0);
+                    const incomeCell = row.insertCell(1);
+                    const expenseCell = row.insertCell(2);
+
+                    dateCell.classList.add('p-3');
+                    incomeCell.classList.add('p-3');
+                    expenseCell.classList.add('p-3');
+
+                    dateCell.textContent = periodType === 'monthly' 
+                        ? เดือนที่ ${i} 
+                        : ${i};
+
+                    const incomeInput = document.createElement('input');
+                    incomeInput.type = 'number';
+                    incomeInput.min = '0';
+                    incomeInput.placeholder = 'รายรับ';
+                    incomeInput.classList.add('w-full', 'p-2', 'border', 'rounded', 'focus:outline-none', 'focus:ring-2', 'focus:ring-green-500');
+                    incomeInput.addEventListener('input', calculateTotals);
+                    incomeCell.appendChild(incomeInput);
+
+                    const expenseInput = document.createElement('input');
+                    expenseInput.type = 'number';
+                    expenseInput.min = '0';
+                    expenseInput.placeholder = 'รายจ่าย';
+                    expenseInput.classList.add('w-full', 'p-2', 'border', 'rounded', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500');
+                    expenseInput.addEventListener('input', calculateTotals);
+                    expenseCell.appendChild(expenseInput);
+                }
+            }
+
+            function calculateTotals() {
+                const incomeInputs = document.querySelectorAll('input[placeholder="รายรับ"]');
+                const expenseInputs = document.querySelectorAll('input[placeholder="รายจ่าย"]');
+
+                const totalIncome = Array.from(incomeInputs)
+                    .reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+                
+                const totalExpense = Array.from(expenseInputs)
+                    .reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+
+                const netAmount = totalIncome - totalExpense;
+
+                totalIncomeEl.textContent = totalIncome.toLocaleString();
+                totalExpenseEl.textContent = totalExpense.toLocaleString();
+                netAmountEl.textContent = netAmount.toLocaleString();
+                netAmountEl.style.color = netAmount >= 0 ? '#2563eb' : '#ef4444';
+            }
+
+            periodTypeSelect.addEventListener('change', generateTableRows);
+            monthSelect.addEventListener('change', generateTableRows);
+            yearSelect.addEventListener('change', generateTableRows);
+
+            populateYears();
+            generateTableRows();
+        </script>
+    </body>
+    </html>

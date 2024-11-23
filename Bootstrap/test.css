@@ -1,0 +1,25 @@
+/* .container{
+    border:1px solid red;
+} */
+
+.material-symbols-outlined {
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
+}
+
+
+.btn{
+    font-size:8px;
+}
+
+.nav-bar > li{
+    font-size:10px;
+    
+    a{
+        color:#000;
+        font:arial;
+    }
+}
